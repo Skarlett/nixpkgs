@@ -15,5 +15,8 @@ let
       })
     ];
   };
-
-in pkgs
+in
+{
+  pkgs=pkgs;
+  lib = import ../lib;
+}
