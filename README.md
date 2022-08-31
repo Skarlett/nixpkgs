@@ -9,4 +9,14 @@ nix packages
 ## `/systems`
 my systems
 
-``` nix-channel add https://github.com/skarlett/nixpkgs/archive/master.tar.gz skarlett```
+### Install
+```
+nix-channel add https://github.com/skarlett/nixpkgs/archive/master.tar.gz skarlett
+nix-channel --update
+
+cd /tmp
+
+nix-build '<skarlett>' -A hello
+
+result/bin/hello
+```

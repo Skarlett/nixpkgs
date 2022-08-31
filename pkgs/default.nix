@@ -2,7 +2,7 @@ let
   sources = import ./toplevel/sources.nix;
 
   hello = pkgs.writeShellScriptBin "hello" ''
-    echo "Hello from the Nix channel overlay!"
+    echo "Hello from the skarlett channel!"
   '';
 
   transfer = pkgs.callPackage ../dotfiles;
