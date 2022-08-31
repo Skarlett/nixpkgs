@@ -1,7 +1,7 @@
 let
   sources = import ./toplevel/sources.nix;
 
-  hello = pkgs.writeShellScriptBin "hello" ''
+  skarletthello = pkgs.writeShellScriptBin "hello" ''
     echo "Hello from the skarlett channel!"
   '';
 
@@ -11,7 +11,7 @@ let
   pkgs = import sources.nixpkgs {
     overlays = [
       (self: super: {
-        inherit hello transfer coggiebot;
+        inherit skarletthello transfer coggiebot;
       })
     ];
   };

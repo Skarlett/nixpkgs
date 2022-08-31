@@ -16,7 +16,7 @@ nix-channel --update
 
 cd /tmp
 
-nix-build '<skarlett>' -A hello
+nix-build '<skarlett>' -A skarletthello
 
 result/bin/hello
 ```
