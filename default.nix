@@ -16,4 +16,4 @@ if ! builtins ? nixVersion || builtins.compareVersions requiredVersion builtins.
   ''
 
 else
-  import ./pkgs/top-level/default.nix
+  import ./pkgs/default.nix

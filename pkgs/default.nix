@@ -16,7 +16,4 @@ let
     ];
   };
 in
-{
-  pkgs=pkgs;
-  lib = import ../lib;
-}
+   pkgs
