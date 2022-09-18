@@ -15,7 +15,7 @@ let
   pkgs = import sources.nixpkgs {
     overlays = [
       (self: super: {
-        inherit skarlett skarletthello transfer coggiebot;
+        inherit skarlett skarletthello coggiebot;
         
         skarlett_version = "1.0";
       })
