@@ -9,7 +9,7 @@ let
     echo "Hello from the skarlett channel!"
   '';
 
-  transfer = pkgs.callPackage dotfiles {};
+  # transfer = pkgs.callPackage dotfiles {};
   coggiebot = pkgs.callPackage pkgs/coggiebot {};
 
   pkgs = import sources.nixpkgs {
