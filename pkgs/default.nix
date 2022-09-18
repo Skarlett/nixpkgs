@@ -16,6 +16,8 @@ let
     overlays = [
       (self: super: {
         inherit skarlett skarletthello transfer coggiebot;
+        
+        skarlett_version = "1.0";
       })
     ];
   };
