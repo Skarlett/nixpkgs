@@ -9,8 +9,8 @@ let
     echo "Hello from the skarlett channel!"
   '';
 
-  transfer = pkgs.callPackage ../dotfiles;
-  coggiebot = pkgs.callPackage ../coggiebot;
+  transfer = pkgs.callPackage ../dotfiles {};
+  coggiebot = pkgs.callPackage ../coggiebot {};
 
   pkgs = import sources.nixpkgs {
     overlays = [
