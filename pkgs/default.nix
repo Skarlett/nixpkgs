@@ -10,7 +10,7 @@ let
   '';
 
   transfer = pkgs.callPackage dotfiles {};
-  coggiebot = pkgs.callPackage coggiebot {};
+  coggiebot = pkgs.callPackage pkgs/coggiebot {};
 
   pkgs = import sources.nixpkgs {
     overlays = [
