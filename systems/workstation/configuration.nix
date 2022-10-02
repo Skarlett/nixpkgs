@@ -1,40 +1,48 @@
-
-
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
-  home-manager = builtins.fetchTarball {
-    url = "https://github.com/nix-community/home-manager/archive/master.tar.gz";
-  };
+   nix-alien =
+     import (
+       fetchTarball https://github.com/thiagokokada/nix-alien/tarball/master
+     ) {};
 
-  impermanence = builtins.fetchTarball {
-    url = "https://github.com/nix-community/impermanence/archive/master.tar.gz";
-  };
+   my_df = pkgs.dwarf-fortress.override {
+     enableIntro = false; enableSound = false;
+   };
 
+   unstableTarball =
+     fetchTarball
+       https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
 in
 {
   # Touch pad 
   # services.xserver.libinput.enable = false;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nixpkgs.config.allowUnfree = true;
-
+  nixpkgs.config = {
+    allowUnfree = true;
+    packageOverrides = pkgs: {
+      unstable = import unstableTarball {
+        config = config.nixpkgs.config;
+      };
+    };
+  };
+  
   hardware.opengl.driSupport32Bit = true;
-  hardware.opengl.driSupport = true;
-
   # if gpu locks screen on bootup
   # boot.blacklistedKernelModules = [ "i915" ];
 
   imports =
   [
-      "${home-manager}/nixos"
-      "${impermanence}/nixos"
+      # <home-manager/nixos>
       ./hardware-configuration.nix
+      ./vscode.nix
   ];
   
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot/efi";
-
+  # boot.extraModulePackages = [ config.boot.kernelPackages.wireguard ];
+  
   # Setup keyfile
   boot.initrd.secrets = {
     "/crypto_keyfile.bin" = null;
@@ -87,6 +95,8 @@ in
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs;
     [
+      unstable.discord
+
       flameshot
       tree
       pandoc
@@ -96,18 +106,13 @@ in
       dolphin-emu
       elementary-planner
       zeroad
-      discord
-      cmake
-      clang
-      gcc
+      
       binutils
       ripgrep
       emacs
       firefox
-      cargo
-      cargo-cross
       tor-browser-bundle-bin
-      bat
+      
       vscode
       kitty
       kitty-themes
@@ -120,20 +125,54 @@ in
       spotify
       aide
       neofetch
-      keepassxc
+      keepassxc     
 
-      lsd
       nerdfonts
       gparted
       tmux
-
+      powershell
       btop
       htop
       bmon
-
+      ghidra-bin
+      
+      dig
       nmap
       python3
       jq
+      my_df
+      # niv
+      steamcmd
+      thunderbird
+      signal-desktop
+      node2nix
+      nodejs
+      xdg-utils      
+      nodePackages.rimraf
+      nodePackages.typescript
+      vulnix
+      nix-alien.nix-alien
+      nix-alien.nix-index-update
+      nix-index
+      font-manager 
+      wireguard-tools
+      starship      
+      libreoffice-fresh     
+      rust-analyzer
+      yara # malware 
+      virtualenv
+      openvpn
+      obsidian
+
+      anydesk
+      clang-tools
+      lldb
+      helix
+      #cargo
+      clang
+      #rust-analyzer
+      rustup
+    
     ];
   };
 
@@ -153,7 +192,8 @@ in
 
     shellAliases = 
     {
-        ls="ls --color always";
+        #ssh="set TERM=xterm-256color; ssh";
+        ls="lsd --color always";
         l="ls -la";
         la="ls -a";
         lt="ls -tree";
@@ -176,8 +216,76 @@ in
         dmesg="dmesg --color=always";
     };
   };
-  
+
+
+  programs.starship.enable = true;
+
+  programs.starship.settings = {
+    add_newline = false;
+    format = "$shlvl$shell$username$hostname$nix_shell$git_branch$git_commit$git_state$git_status$directory$jobs$cmd_duration$character";
+    shlvl = {
+      disabled = false;
+      symbol = "ﰬ";
+      style = "bright-red bold";
+    };
+    shell = {
+      disabled = false;
+      format = "$indicator";
+      fish_indicator = "";
+      bash_indicator = "[BASH](bright-white) ";
+      zsh_indicator = "[ZSH](bright-white) ";
+    };
+    username = {
+      style_user = "bright-white bold";
+      style_root = "bright-red bold";
+    };
+    hostname = {
+      style = "bright-green bold";
+      ssh_only = true;
+    };
+    nix_shell = {
+      symbol = "";
+      format = "[$symbol$name]($style) ";
+      style = "bright-purple bold";
+    };
+    git_branch = {
+      only_attached = true;
+      format = "[$symbol$branch]($style) ";
+      symbol = "שׂ";
+      style = "bright-yellow bold";
+    };
+    git_commit = {
+      only_detached = true;
+      format = "[ﰖ$hash]($style) ";
+      style = "bright-yellow bold";
+    };
+    git_state = {
+      style = "bright-purple bold";
+    };
+    git_status = {
+      style = "bright-green bold";
+    };
+    directory = {
+      read_only = " ";
+      truncation_length = 0;
+    };
+    cmd_duration = {
+      format = "[$duration]($style) ";
+      style = "bright-blue";
+    };
+    jobs = {
+      style = "bright-green bold";
+    };
+    character = {
+      success_symbol = "[\\$](bright-green bold)";
+      error_symbol = "[\\$](bright-red bold)";
+    };
+  };
+
   environment.systemPackages = with pkgs; [
+     lsd
+     bat
+     unzip
      vim
      wget
      tor
@@ -187,8 +295,45 @@ in
 
   services.printing.enable = true;
   services.openssh.enable = true;
-  
-  # This honestly needs its own derivation
+
+  networking.firewall = {
+    allowedUDPPorts = [ 51820 ]; # Clients and peers can use the same port, see listenport
+  };
+
+  services.openvpn.servers = {
+    client = {
+      config = ''
+        dev tun
+	persist-tun
+	persist-key
+	data-ciphers AES-128-GCM
+	data-ciphers-fallback AES-128-GCM
+	auth SHA256
+	tls-client
+	client
+	resolv-retry infinite
+	remote 10.0.0.52 1194 udp4
+	nobind
+	verify-x509-name "openvpn-server" name
+	pkcs12 /etc/nixos/vpn/certs.p12
+	tls-auth /etc/nixos/vpn/tls-key 1
+	remote-cert-tls server
+	explicit-exit-notify
+      '';
+
+      up = "echo nameserver $nameserver | ${pkgs.openresolv}/sbin/resolvconf -m 0 -a $dev";
+      down = "${pkgs.openresolv}/sbin/resolvconf -d $dev";
+    };
+  };
+
+  vscode.user = "lunarix";
+  vscode.homeDir = "/home/lunarix"; 
+  vscode.extensions = with pkgs.vscode-extensions; [
+    # bbenoist.Nix
+    # WakaTime.vscode-wakatime
+    vadimcn.vscode-lldb  
+  ]; 
+  # this honestly needs its own derivation
   # where our backup.ignore file is a list instead
   # and our ssh backup-key is also a string
   systemd.user.services."backup-home" = {
